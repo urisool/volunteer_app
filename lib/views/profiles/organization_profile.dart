@@ -1,20 +1,22 @@
+// ignore_for_file: unused_local_variable, must_be_immutable
+
 import 'package:flutter/material.dart';
-import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/models/organization_model.dart';
 import 'package:volunteer_app/services/profile_service.dart';
 import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';
 
-class VolunteerProfilePage extends StatefulWidget {
-  Volunteer volunteer; // جعل الحقل final
+class OrganizationProfilePage extends StatefulWidget {
+  Organization organization; // جعل الحقل final
   // إزالة const من constructor
-  VolunteerProfilePage({Key? key, required this.volunteer}) : super(key: key);
+  OrganizationProfilePage({super.key, required this.organization});
 
   @override
-  _VolunteerProfilePageState createState() => _VolunteerProfilePageState();
+  OrganizationProfilePageState createState() => OrganizationProfilePageState();
 }
 
-class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
+class OrganizationProfilePageState extends State<OrganizationProfilePage> {
   final ProfileService _profileService = ProfileService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -27,9 +29,11 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   Future<void> _loadProfileData() async {
     try {
-      final volunteer = await _profileService.getVolunteerProfile(widget.volunteer.id);
+      final organization = await _profileService.getVolunteerProfile(
+        widget.organization.id,
+      );
       setState(() {
-        widget.volunteer = volunteer;
+        widget.organization = Organization as Organization;
         _isLoading = false;
       });
     } catch (e) {
@@ -45,14 +49,14 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     if (_isLoading) {
       return Center(child: CircularProgressIndicator());
     }
-    
+
     if (_errorMessage != null) {
       return Center(child: Text(_errorMessage!));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Volunteer Profile'),
+        title: Text('Organization Profile'),
         actions: [
           IconButton(
             icon: Icon(Icons.edit),
@@ -64,49 +68,48 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         child: Column(
           children: [
             ProfileHeader(
-              imageUrl: widget.volunteer.profileImageUrl,
-              name: widget.volunteer.name,
-              role: 'Volunteer',
+              imageUrl: widget.organization.profileImageUrl,
+              name: widget.organization.name,
+              role: 'Organization',
+            ),
+            ProfileSection(title: 'Bio', content: widget.organization.bio),
+            ProfileSection(
+              title: 'Location',
+              content: widget.organization.location.join(', '),
             ),
             ProfileSection(
-              title: 'Bio',
-              content: widget.volunteer.bio,
+              title: 'Facebook Page',
+              content: widget.organization.facebook,
             ),
             ProfileSection(
-              title: 'Skills',
-              content: widget.volunteer.skills.join(', '),
+              title: 'Instagram Page',
+              content: widget.organization.instagram,
             ),
-            ProfileSection(
-              title: 'Experience',
-              content: widget.volunteer.experience,
-            ),
-            ProfileSection(
-              title: 'Education',
-              content: widget.volunteer.education,
-            ),
-            ProfileSection(
-              title: 'Certifications',
-              content: widget.volunteer.certifications.join('\n'),
-            ),
+            ProfileSection(title: 'Email', content: widget.organization.email),
           ],
         ),
       ),
     );
   }
-  
+
   void _navigateToEditProfile() {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => EditProfilePage(
-          user: widget.volunteer,
-          isOrganization: false,
-        ),
+        builder: (context) {
+          var editProfilePage = EditProfilePage(
+            user: widget.organization, // FIXED LINE
+            isOrganization: true,
+            bool:
+                null, // you might want to rename this `bool` param; it's a keyword!
+          );
+          return editProfilePage;
+        },
       ),
     ).then((updatedUser) {
       if (updatedUser != null) {
         setState(() {
-          widget.volunteer = updatedUser as Volunteer;
+          widget.organization = updatedUser as Organization;
         });
       }
     });
