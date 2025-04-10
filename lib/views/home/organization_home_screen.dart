@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:volunteer_app/models/organization_model.dart';
+import 'package:volunteer_app/providers/auth_provider.dart';
 
 class OrganizationHomeScreen extends StatelessWidget {
-  const OrganizationHomeScreen({Key? key}) : super(key: key);
+  const OrganizationHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,17 +30,17 @@ class OrganizationHomeScreen extends StatelessWidget {
           children: [
             Text(
               organization.name,
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 4),
             Text(
               organization.field,
-              style: Theme.of(context).textTheme.subtitle1,
+              style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 8),
             Text(
               organization.bio,
-              style: Theme.of(context).textTheme.bodyText2,
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 20),
             Row(

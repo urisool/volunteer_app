@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/providers/auth_provider.dart';
 
 class VolunteerHomeScreen extends StatelessWidget {
-  const VolunteerHomeScreen({Key? key}) : super(key: key);
+  const VolunteerHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -29,13 +30,10 @@ class VolunteerHomeScreen extends StatelessWidget {
           children: [
             Text(
               'Welcome, ${volunteer.name}!',
-              style: Theme.of(context).textTheme.headline5,
+              style: Theme.of(context).textTheme.headlineSmall,
             ),
             const SizedBox(height: 8),
-            Text(
-              volunteer.bio,
-              style: Theme.of(context).textTheme.bodyText2,
-            ),
+            Text(volunteer.bio, style: Theme.of(context).textTheme.bodyMedium),
             const SizedBox(height: 20),
             const Text(
               'Your Skills:',
@@ -43,9 +41,10 @@ class VolunteerHomeScreen extends StatelessWidget {
             ),
             Wrap(
               spacing: 8,
-              children: volunteer.skills
-                  .map((skill) => Chip(label: Text(skill)))
-                  .toList(),
+              children:
+                  volunteer.skills
+                      .map((skill) => Chip(label: Text(skill)))
+                      .toList(),
             ),
             const SizedBox(height: 20),
             Expanded(
@@ -54,7 +53,9 @@ class VolunteerHomeScreen extends StatelessWidget {
                   ListTile(
                     leading: Icon(Icons.work),
                     title: Text('Available Opportunities'),
-                    subtitle: Text('Browse volunteering opportunities near you'),
+                    subtitle: Text(
+                      'Browse volunteering opportunities near you',
+                    ),
                     trailing: Icon(Icons.arrow_forward),
                   ),
                   ListTile(
