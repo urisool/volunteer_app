@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:volunteer_app/providers/auth_provider.dart';
 
 class LoginScreen extends StatefulWidget {
   final bool isOrganization;
-  
-  const LoginScreen({
-    Key? key,
-    required this.isOrganization,
-  }) : super(key: key);
+
+  const LoginScreen({Key? key, required this.isOrganization}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -32,7 +29,9 @@ class _LoginScreenState extends State<LoginScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isOrganization ? 'Organization Login' : 'Volunteer Login'),
+        title: Text(
+          widget.isOrganization ? 'Organization Login' : 'Volunteer Login',
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -76,11 +75,13 @@ class _LoginScreenState extends State<LoginScreen> {
                         _passwordController.text,
                         isOrganization: widget.isOrganization,
                       );
-                      
+
                       if (authProvider.error == null) {
                         Navigator.pushReplacementNamed(
                           context,
-                          widget.isOrganization ? '/organization/home' : '/volunteer/home',
+                          widget.isOrganization
+                              ? '/organization/home'
+                              : '/volunteer/home',
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -96,7 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-                    widget.isOrganization ? '/organization/register' : '/volunteer/register',
+                    widget.isOrganization
+                        ? '/organization/register'
+                        : '/volunteer/register',
                   );
                 },
                 child: const Text('Don\'t have an account? Register'),

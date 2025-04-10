@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
+import 'package:volunteer_app/providers/auth_provider.dart';
 
 class RegisterScreen extends StatefulWidget {
   final bool isOrganization;
-  
-  const RegisterScreen({
-    Key? key,
-    required this.isOrganization,
-  }) : super(key: key);
+
+  const RegisterScreen({Key? key, required this.isOrganization})
+    : super(key: key);
 
   @override
   _RegisterScreenState createState() => _RegisterScreenState();
@@ -46,7 +44,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.isOrganization ? 'Organization Register' : 'Volunteer Register'),
+        title: Text(
+          widget.isOrganization
+              ? 'Organization Register'
+              : 'Volunteer Register',
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -97,7 +99,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Confirm Password'),
+                decoration: const InputDecoration(
+                  labelText: 'Confirm Password',
+                ),
                 obscureText: true,
                 validator: (value) {
                   if (value != _passwordController.text) {
@@ -122,7 +126,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _fieldController,
-                  decoration: const InputDecoration(labelText: 'Field/Industry'),
+                  decoration: const InputDecoration(
+                    labelText: 'Field/Industry',
+                  ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your organization field';
@@ -175,14 +181,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       };
 
                       await authProvider.register(
-                        userData, 
+                        userData,
                         widget.isOrganization,
                       );
-                      
+
                       if (authProvider.error == null) {
                         Navigator.pushReplacementNamed(
                           context,
-                          widget.isOrganization ? '/organization/home' : '/volunteer/home',
+                          widget.isOrganization
+                              ? '/organization/home'
+                              : '/volunteer/home',
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
@@ -198,7 +206,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 onPressed: () {
                   Navigator.pushNamed(
                     context,
-                    widget.isOrganization ? '/organization/login' : '/volunteer/login',
+                    widget.isOrganization
+                        ? '/organization/login'
+                        : '/volunteer/login',
                   );
                 },
                 child: const Text('Already have an account? Login'),

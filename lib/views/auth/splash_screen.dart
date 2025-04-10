@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/auth_provider.dart';
 import 'package:volunteer_app/providers/auth_provider.dart';
 import 'package:volunteer_app/models/organization_model.dart';
 
@@ -20,7 +19,7 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
-    
+
     // محاكاة عملية التهيئة
     await Future.delayed(const Duration(seconds: 2));
 
@@ -49,9 +48,9 @@ class _SplashScreenState extends State<SplashScreen> {
             Text(
               'Volunteer App',
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    color: Theme.of(context).primaryColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+                color: Theme.of(context).primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(),
