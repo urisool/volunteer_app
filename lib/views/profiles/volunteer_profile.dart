@@ -1,10 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/services/profile_service.dart';
+import 'package:volunteer_app/views/profiles/edit_profile.dart';
+import 'package:volunteer_app/widgets/profile_header.dart';
+import 'package:volunteer_app/widgets/profile_section.dart';
 import '../models/volunteer_model.dart';
 
 class VolunteerProfilePage extends StatefulWidget {
-  final Volunteer volunteer;
+  Volunteer volunteer;
   
-  const VolunteerProfilePage({Key? key, required this.volunteer}) : super(key: key);
+  const VolunteerProfilePage({super.key, required this.volunteer});
+  
+  String? get userId => null;
   
   @override
   _VolunteerProfilePageState createState() => _VolunteerProfilePageState();
@@ -113,34 +120,6 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
     );
   }
 
-  void _navigateToEditProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => EditProfilePage(
-          user: widget.volunteer,
-          isOrganization: false,
-        ),
-      ),
-    ).then((updatedUser) async {
-      if (updatedUser != null) {
-        try {
-          final updatedVolunteer = updatedUser as Volunteer;
-          await _profileService.updateVolunteerProfile(updatedVolunteer);
-          setState(() {
-            widget.volunteer = updatedVolunteer;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Profile updated successfully')),
-          );
-        } catch (e) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to update profile: $e')),
-          );
-        }
-      }
-    });
-  }
 
   @override
   void dispose() {
