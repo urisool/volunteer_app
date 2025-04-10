@@ -7,7 +7,13 @@ class Organization extends User {
   String address;
   List<String> currentProjects;
   double rating;
-  
+
+  var location;
+
+  var facebook;
+
+  var instagram;
+
   Organization({
     required String id,
     required String name,
@@ -20,10 +26,10 @@ class Organization extends User {
     required this.currentProjects,
     required this.rating,
   }) : super(
-    id: id,
-    name: name,
-    bio: bio,
-    profileImageUrl: profileImageUrl,
-    role: 'organization',
-  );
+         id: id,
+         name: name,
+         bio: bio,
+         profileImageUrl: profileImageUrl,
+         role: 'organization',
+       );
 }

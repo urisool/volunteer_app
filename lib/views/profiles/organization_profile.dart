@@ -100,7 +100,7 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
           var editProfilePage = EditProfilePage(
             user: widget.organization, // FIXED LINE
             isOrganization: true,
-            bool:
+            key:
                 null, // you might want to rename this `bool` param; it's a keyword!
           );
           return editProfilePage;

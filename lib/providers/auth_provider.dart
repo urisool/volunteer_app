@@ -13,7 +13,11 @@ class AuthProvider with ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> login(String email, String password, {required bool isOrganization}) async {
+  Future<void> login(
+    String email,
+    String password, {
+    required bool isOrganization,
+  }) async {
     try {
       _isLoading = true;
       notifyListeners();
@@ -111,11 +115,11 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
 
       final profileService = ProfileService();
-      
+
       if (updatedUser is Volunteer) {
         await profileService.updateVolunteerProfile(updatedUser);
       } else if (updatedUser is Organization) {
-        await profileService.updateOrganizationProfile(updatedUser as Organization);
+        await profileService.updateOrganizationProfile(updatedUser);
       }
 
       _currentUser = updatedUser;

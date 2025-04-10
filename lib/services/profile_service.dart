@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import '../models/user_model.dart';
 import '../models/volunteer_model.dart';
 import '../models/organization_model.dart';
 
@@ -24,14 +23,17 @@ class ProfileService {
           id: data['id'],
           name: data['name'],
           bio: data['bio'] ?? '',
-          profileImageUrl: data['profileImageUrl'] ?? 'https://via.placeholder.com/150',
+          profileImageUrl:
+              data['profileImageUrl'] ?? 'https://via.placeholder.com/150',
           skills: List<String>.from(data['skills'] ?? []),
           experience: data['experience'] ?? '',
           certifications: List<String>.from(data['certifications'] ?? []),
           education: data['education'] ?? '',
         );
       } else {
-        throw Exception('Failed to load volunteer profile: ${response.statusCode}');
+        throw Exception(
+          'Failed to load volunteer profile: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching volunteer profile: $e');
@@ -52,7 +54,8 @@ class ProfileService {
           id: data['id'],
           name: data['name'],
           bio: data['bio'] ?? '',
-          profileImageUrl: data['profileImageUrl'] ?? 'https://via.placeholder.com/150',
+          profileImageUrl:
+              data['profileImageUrl'] ?? 'https://via.placeholder.com/150',
           field: data['field'] ?? '',
           phone: data['phone'] ?? '',
           email: data['email'] ?? '',
@@ -61,7 +64,9 @@ class ProfileService {
           rating: (data['rating'] ?? 0).toDouble(),
         );
       } else {
-        throw Exception('Failed to load organization profile: ${response.statusCode}');
+        throw Exception(
+          'Failed to load organization profile: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error fetching organization profile: $e');
@@ -88,7 +93,9 @@ class ProfileService {
       if (response.statusCode == 200) {
         return volunteer;
       } else {
-        throw Exception('Failed to update volunteer profile: ${response.statusCode}');
+        throw Exception(
+          'Failed to update volunteer profile: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error updating volunteer profile: $e');
@@ -96,7 +103,9 @@ class ProfileService {
   }
 
   // تحديث بيانات المنظمة
-  Future<Organization> updateOrganizationProfile(Organization organization) async {
+  Future<Organization> updateOrganizationProfile(
+    Organization organization,
+  ) async {
     try {
       final response = await _client.put(
         Uri.parse('$_baseUrl/organizations/${organization.id}'),
@@ -117,7 +126,9 @@ class ProfileService {
       if (response.statusCode == 200) {
         return organization;
       } else {
-        throw Exception('Failed to update organization profile: ${response.statusCode}');
+        throw Exception(
+          'Failed to update organization profile: ${response.statusCode}',
+        );
       }
     } catch (e) {
       throw Exception('Error updating organization profile: $e');
@@ -125,7 +136,11 @@ class ProfileService {
   }
 
   // رفع صورة الملف الشخصي
-  Future<String> uploadProfileImage(String userId, String filePath, bool isOrganization) async {
+  Future<String> uploadProfileImage(
+    String userId,
+    String filePath,
+    bool isOrganization,
+  ) async {
     try {
       var request = http.MultipartRequest(
         'POST',
@@ -134,7 +149,8 @@ class ProfileService {
 
       request.headers.addAll(_getHeaders());
       request.fields['userId'] = userId;
-      request.fields['userType'] = isOrganization ? 'organization' : 'volunteer';
+      request.fields['userType'] =
+          isOrganization ? 'organization' : 'volunteer';
       request.files.add(await http.MultipartFile.fromPath('image', filePath));
 
       var response = await request.send();
