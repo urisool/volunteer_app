@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:volunteer_app/models/organization_model.dart';
+import 'package:volunteer_app/models/user_model.dart';
+import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/services/profile_service.dart';
+import 'package:volunteer_app/widgets/editable_field.dart';
 import '../models/user_model.dart';
 import '../models/volunteer_model.dart';
 import '../models/organization_model.dart';
+// ignore: depend_on_referenced_packages
 import 'package:image_picker/image_picker.dart';
 
 
@@ -14,6 +20,10 @@ class EditProfilePage extends StatefulWidget {
     required this.user,
     required this.isOrganization,
   }) : super(key: key);
+  
+  get volunteer => null;
+  
+  set volunteer(Volunteer volunteer) {}
   
   @override
   _EditProfilePageState createState() => _EditProfilePageState();
@@ -120,7 +130,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
                   child: Text('Cancel'),
-                  style: ElevatedButton.styleFrom(primary: Colors.grey),
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
                 ),
                 ElevatedButton(
                   onPressed: _saveChanges,
@@ -174,7 +184,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
 
   Future<void> _loadProfileData() async {
     try {
-      final volunteer = await _profileService.getVolunteerProfile(widget.userId);
+      final volunteer = await _profileService.getVolunteerProfile(widget.user as String);
       setState(() {
         widget.volunteer = volunteer;
         _isLoading = false;
