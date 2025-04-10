@@ -4,15 +4,11 @@ import 'package:volunteer_app/services/profile_service.dart';
 import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';
-import '../models/volunteer_model.dart';
 
 class VolunteerProfilePage extends StatefulWidget {
-  Volunteer volunteer;
-  
-  const VolunteerProfilePage({super.key, required this.volunteer});
-  
-  String? get userId => null;
-  
+  Volunteer volunteer; // جعل الحقل final
+  VolunteerProfilePage({Key? key, required this.volunteer}) : super(key: key); // إزالة const
+
   @override
   _VolunteerProfilePageState createState() => _VolunteerProfilePageState();
 }
@@ -21,8 +17,38 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   final ProfileService _profileService = ProfileService();
   bool _isLoading = true;
   String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileData();
+  }
+
+  Future<void> _loadProfileData() async {
+    try {
+      final volunteer = await _profileService.getVolunteerProfile(widget.volunteer.id); // التأكد من أنه id الصحيح
+      setState(() {
+        widget.volunteer = volunteer;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load profile: $e';
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Center(child: CircularProgressIndicator());
+    }
+    
+    if (_errorMessage != null) {
+      return Center(child: Text(_errorMessage!));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Volunteer Profile'),
@@ -84,48 +110,10 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
       }
     });
   }
-  @override
-  void initState() {
-    super.initState();
-    _loadProfileData();
-  }
-
-  Future<void> _loadProfileData() async {
-    try {
-      final volunteer = await _profileService.getVolunteerProfile(widget.userId);
-      setState(() {
-        widget.volunteer = volunteer;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load profile: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    
-    if (_errorMessage != null) {
-      return Center(child: Text(_errorMessage!));
-    }
-
-    return Scaffold(
-      // باقي الكود كما هو...
-    );
-  }
-
 
   @override
   void dispose() {
     _profileService.dispose();
     super.dispose();
   }
-}
-
 }
