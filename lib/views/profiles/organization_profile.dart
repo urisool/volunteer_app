@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:volunteer_app/models/organization_model.dart';
+import 'package:volunteer_app/views/profiles/edit_profile.dart';
+import 'package:volunteer_app/widgets/profile_header.dart';
+import 'package:volunteer_app/widgets/profile_section.dart';
 import '../models/organization_model.dart';
 
 class OrganizationProfilePage extends StatefulWidget {
-  final Organization organization;
+  Organization organization;
   
-  const OrganizationProfilePage({Key? key, required this.organization}) : super(key: key);
+  const OrganizationProfilePage({super.key, required this.organization});
   
   @override
   _OrganizationProfilePageState createState() => _OrganizationProfilePageState();
