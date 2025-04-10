@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/models/organization_model.dart';
 import 'package:volunteer_app/services/profile_service.dart';
 import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';
 
 // ignore: must_be_immutable
-class VolunteerProfilePage extends StatefulWidget {
-  Volunteer volunteer; // جعل الحقل final
-  // إزالة const من constructor
-  VolunteerProfilePage({super.key, required this.volunteer});
+class OrganizationProfilePage extends StatefulWidget {
+  Organization organization;
+  OrganizationProfilePage({super.key, required this.organization});
 
   @override
   // ignore: library_private_types_in_public_api
-  _VolunteerProfilePageState createState() => _VolunteerProfilePageState();
+  _OrganizationProfilePageState createState() => _OrganizationProfilePageState();
 }
 
-class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
+class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
   final ProfileService _profileService = ProfileService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -29,9 +28,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
 
   Future<void> _loadProfileData() async {
     try {
-      final volunteer = await _profileService.getVolunteerProfile(widget.volunteer.id);
+      final org = await _profileService.getOrganizationProfile(widget.organization.id);
       setState(() {
-        widget.volunteer = volunteer;
+        widget.organization = org;
         _isLoading = false;
       });
     } catch (e) {
@@ -45,20 +44,20 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (_errorMessage != null) {
       return Center(child: Text(_errorMessage!));
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Volunteer Profile'),
+        title: const Text('Organization Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => _navigateToEditProfile(),
+            icon: const Icon(Icons.edit),
+            onPressed: _navigateToEditProfile,
           ),
         ],
       ),
@@ -66,49 +65,45 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         child: Column(
           children: [
             ProfileHeader(
-              imageUrl: widget.volunteer.profileImageUrl,
-              name: widget.volunteer.name,
-              role: 'Volunteer',
+              imageUrl: widget.organization.logoUrl,
+              name: widget.organization.name,
+              role: 'Organization',
             ),
             ProfileSection(
-              title: 'Bio',
-              content: widget.volunteer.bio,
+              title: 'Description',
+              content: widget.organization.description,
             ),
             ProfileSection(
-              title: 'Skills',
-              content: widget.volunteer.skills.join(', '),
+              title: 'Services',
+              content: widget.organization.services.join(', '),
             ),
             ProfileSection(
-              title: 'Experience',
-              content: widget.volunteer.experience,
+              title: 'Website',
+              content: widget.organization.website,
             ),
             ProfileSection(
-              title: 'Education',
-              content: widget.volunteer.education,
-            ),
-            ProfileSection(
-              title: 'Certifications',
-              content: widget.volunteer.certifications.join('\n'),
+              title: 'Contact',
+              content: widget.organization.contactEmail,
             ),
           ],
         ),
       ),
     );
   }
-  
+
   void _navigateToEditProfile() {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditProfilePage(
-          user: widget.volunteer,
-          isOrganization: false,
+          user: widget.organization,
+          isOrganization: true,
         ),
       ),
-    ).then((updatedUser) {
-      if (updatedUser != null) {
+    ).then((updatedOrg) {
+      if (updatedOrg != null) {
         setState(() {
-          widget.volunteer = updatedUser as Volunteer;
+          widget.organization = updatedOrg as Organization;
         });
       }
     });

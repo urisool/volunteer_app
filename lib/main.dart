@@ -102,3 +102,6 @@ class MyApp extends StatelessWidget {
     );
   }
 }
+
+class OrganizationProfilePage {
+}

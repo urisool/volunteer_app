@@ -22,4 +22,14 @@ class Organization extends User {
   }) : super(
     role: 'organization',
   );
+
+  get logoUrl => null;
+
+  get description => null;
+
+  get services => null;
+
+  get website => null;
+
+  get contactEmail => null;
 }
