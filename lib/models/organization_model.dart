@@ -9,10 +9,10 @@ class Organization extends User {
   double rating;
   
   Organization({
-    required String id,
-    required String name,
-    required String bio,
-    required String profileImageUrl,
+    required super.id,
+    required super.name,
+    required super.bio,
+    required super.profileImageUrl,
     required this.field,
     required this.phone,
     required this.email,
@@ -20,10 +20,6 @@ class Organization extends User {
     required this.currentProjects,
     required this.rating,
   }) : super(
-    id: id,
-    name: name,
-    bio: bio,
-    profileImageUrl: profileImageUrl,
     role: 'organization',
   );
 }

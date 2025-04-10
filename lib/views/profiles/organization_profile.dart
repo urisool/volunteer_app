@@ -5,12 +5,14 @@ import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';
 
+// ignore: must_be_immutable
 class VolunteerProfilePage extends StatefulWidget {
   Volunteer volunteer; // جعل الحقل final
   // إزالة const من constructor
-  VolunteerProfilePage({Key? key, required this.volunteer}) : super(key: key);
+  VolunteerProfilePage({super.key, required this.volunteer});
 
   @override
+  // ignore: library_private_types_in_public_api
   _VolunteerProfilePageState createState() => _VolunteerProfilePageState();
 }
 

@@ -7,12 +7,12 @@ class EditableField extends StatelessWidget {
   final TextInputType keyboardType;
   
   const EditableField({
-    Key? key,
+    super.key,
     required this.controller,
     required this.label,
     this.maxLines = 1,
     this.keyboardType = TextInputType.text,
-  }) : super(key: key);
+  });
   
   @override
   Widget build(BuildContext context) {

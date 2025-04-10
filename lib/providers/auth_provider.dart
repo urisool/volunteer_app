@@ -115,7 +115,7 @@ class AuthProvider with ChangeNotifier {
       if (updatedUser is Volunteer) {
         await profileService.updateVolunteerProfile(updatedUser);
       } else if (updatedUser is Organization) {
-        await profileService.updateOrganizationProfile(updatedUser as Organization);
+        await profileService.updateOrganizationProfile(updatedUser);
       }
 
       _currentUser = updatedUser;

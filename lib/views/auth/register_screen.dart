@@ -5,10 +5,10 @@ import 'package:volunteer_app/providers/auth_provider.dart';
 class RegisterScreen extends StatefulWidget {
   final bool isOrganization;
 
-  const RegisterScreen({Key? key, required this.isOrganization})
-    : super(key: key);
+  const RegisterScreen({super.key, required this.isOrganization});
 
   @override
+  // ignore: library_private_types_in_public_api
   _RegisterScreenState createState() => _RegisterScreenState();
 }
 
@@ -187,12 +187,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
                       if (authProvider.error == null) {
                         Navigator.pushReplacementNamed(
+                          // ignore: use_build_context_synchronously
                           context,
                           widget.isOrganization
                               ? '/organization/home'
                               : '/volunteer/home',
                         );
                       } else {
+                        // ignore: use_build_context_synchronously
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text(authProvider.error!)),
                         );
