@@ -4,8 +4,7 @@ class ProfileSection extends StatelessWidget {
   final String title;
   final String content;
 
-  const ProfileSection({Key? key, required this.title, required this.content})
-    : super(key: key);
+  const ProfileSection({super.key, required this.title, required this.content});
 
   @override
   Widget build(BuildContext context) {

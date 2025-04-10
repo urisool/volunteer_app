@@ -8,28 +8,26 @@ class Organization extends User {
   List<String> currentProjects;
   double rating;
 
-  var location;
-
-  var facebook;
-
-  var instagram;
-
   Organization({
-    required String id,
-    required String name,
-    required String bio,
-    required String profileImageUrl,
+    required super.id,
+    required super.name,
+    required super.bio,
+    required super.profileImageUrl,
     required this.field,
     required this.phone,
     required this.email,
     required this.address,
     required this.currentProjects,
     required this.rating,
-  }) : super(
-         id: id,
-         name: name,
-         bio: bio,
-         profileImageUrl: profileImageUrl,
-         role: 'organization',
-       );
+  }) : super(role: 'organization');
+
+  get logoUrl => null;
+
+  get description => null;
+
+  get services => null;
+
+  get website => null;
+
+  get contactEmail => null;
 }

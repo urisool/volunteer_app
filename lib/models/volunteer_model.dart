@@ -7,19 +7,15 @@ class Volunteer extends User {
   String education;
   
   Volunteer({
-    required String id,
-    required String name,
-    required String bio,
-    required String profileImageUrl,
+    required super.id,
+    required super.name,
+    required super.bio,
+    required super.profileImageUrl,
     required this.skills,
     required this.experience,
     required this.certifications,
     required this.education,
   }) : super(
-    id: id,
-    name: name,
-    bio: bio,
-    profileImageUrl: profileImageUrl,
     role: 'volunteer',
   );
 }

@@ -1,5 +1,3 @@
-// ignore_for_file: unused_local_variable, must_be_immutable
-
 import 'package:flutter/material.dart';
 import 'package:volunteer_app/models/organization_model.dart';
 import 'package:volunteer_app/services/profile_service.dart';
@@ -7,16 +5,18 @@ import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';
 
+// ignore: must_be_immutable
 class OrganizationProfilePage extends StatefulWidget {
-  Organization organization; // جعل الحقل final
-  // إزالة const من constructor
+  Organization organization;
   OrganizationProfilePage({super.key, required this.organization});
 
   @override
-  OrganizationProfilePageState createState() => OrganizationProfilePageState();
+  // ignore: library_private_types_in_public_api
+  _OrganizationProfilePageState createState() =>
+      _OrganizationProfilePageState();
 }
 
-class OrganizationProfilePageState extends State<OrganizationProfilePage> {
+class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
   final ProfileService _profileService = ProfileService();
   bool _isLoading = true;
   String? _errorMessage;
@@ -29,11 +29,11 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
 
   Future<void> _loadProfileData() async {
     try {
-      final organization = await _profileService.getVolunteerProfile(
+      final org = await _profileService.getOrganizationProfile(
         widget.organization.id,
       );
       setState(() {
-        widget.organization = Organization as Organization;
+        widget.organization = org;
         _isLoading = false;
       });
     } catch (e) {
@@ -47,7 +47,7 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
+      return const Center(child: CircularProgressIndicator());
     }
 
     if (_errorMessage != null) {
@@ -56,11 +56,11 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Organization Profile'),
+        title: const Text('Organization Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => _navigateToEditProfile(),
+            icon: const Icon(Icons.edit),
+            onPressed: _navigateToEditProfile,
           ),
         ],
       ),
@@ -68,24 +68,26 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
         child: Column(
           children: [
             ProfileHeader(
-              imageUrl: widget.organization.profileImageUrl,
+              imageUrl: widget.organization.logoUrl,
               name: widget.organization.name,
               role: 'Organization',
             ),
-            ProfileSection(title: 'Bio', content: widget.organization.bio),
             ProfileSection(
-              title: 'Location',
-              content: widget.organization.location.join(', '),
+              title: 'Description',
+              content: widget.organization.description,
             ),
             ProfileSection(
-              title: 'Facebook Page',
-              content: widget.organization.facebook,
+              title: 'Services',
+              content: widget.organization.services.join(', '),
             ),
             ProfileSection(
-              title: 'Instagram Page',
-              content: widget.organization.instagram,
+              title: 'Website',
+              content: widget.organization.website,
             ),
-            ProfileSection(title: 'Email', content: widget.organization.email),
+            ProfileSection(
+              title: 'Contact',
+              content: widget.organization.contactEmail,
+            ),
           ],
         ),
       ),
@@ -96,20 +98,16 @@ class OrganizationProfilePageState extends State<OrganizationProfilePage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) {
-          var editProfilePage = EditProfilePage(
-            user: widget.organization, // FIXED LINE
-            isOrganization: true,
-            key:
-                null, // you might want to rename this `bool` param; it's a keyword!
-          );
-          return editProfilePage;
-        },
+        builder:
+            (context) => EditProfilePage(
+              user: widget.organization,
+              isOrganization: true,
+            ),
       ),
-    ).then((updatedUser) {
-      if (updatedUser != null) {
+    ).then((updatedOrg) {
+      if (updatedOrg != null) {
         setState(() {
-          widget.organization = updatedUser as Organization;
+          widget.organization = updatedOrg as Organization;
         });
       }
     });
