@@ -1,0 +1,2 @@
+C:/Users/Dell/Desktop/volunteer_app/android/app/.cxx/RelWithDebInfo/142s451w/arm64-v8a/CMakeFiles/edit_cache.dir
+C:/Users/Dell/Desktop/volunteer_app/android/app/.cxx/RelWithDebInfo/142s451w/arm64-v8a/CMakeFiles/rebuild_cache.dir
