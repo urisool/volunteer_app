@@ -9,7 +9,10 @@ android {
     namespace = "com.example.volunteer_app"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = "27.0.12077973"
+<<<<<<< HEAD
 
+=======
+>>>>>>> b36dbfad87fd2c8682afc5a05940840555293b74
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
