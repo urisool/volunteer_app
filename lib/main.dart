@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:volunteer_app/views/auth/login_screen.dart';
+import 'package:volunteer_app/views/auth/register_screen.dart';
 
 // Models
 import 'models/volunteer_model.dart';
@@ -11,8 +13,6 @@ import 'providers/auth_provider.dart';
 // Screens
 import 'views/auth/splash_screen.dart';
 import 'views/auth/role_selection_screen.dart';
-import 'views/auth/login_screen.dart';
-import 'views/auth/register_screen.dart';
 import 'views/home/volunteer_home_screen.dart';
 import 'views/home/organization_home_screen.dart';
 
