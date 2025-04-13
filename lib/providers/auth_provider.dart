@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user_model.dart';
 import '../models/volunteer_model.dart';
 import '../models/organization_model.dart';
-import '../services/profile_service.dart';
+import '../services/local_storage_service.dart';
 
 class AuthProvider with ChangeNotifier {
   User? _currentUser;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:volunteer_app/views/auth/login_screen.dart';
-import 'package:volunteer_app/views/auth/register_screen.dart';
+
+// Services
 
 // Models
 import 'models/volunteer_model.dart';
@@ -11,23 +11,34 @@ import 'models/organization_model.dart';
 import 'providers/auth_provider.dart';
 
 // Screens
-import 'views/auth/splash_screen.dart';
+import 'views/splash_screen.dart';
+import 'views/auth/login_screen.dart';
+import 'views/auth/register_screen.dart';
 import 'views/auth/role_selection_screen.dart';
 import 'views/home/volunteer_home_screen.dart';
 import 'views/home/organization_home_screen.dart';
+import 'views/profiles/edit_profile.dart';
 
 // Use aliases to avoid name conflicts
 import 'views/profiles/volunteer_profile.dart' as volunteer_profile;
 import 'views/profiles/organization_profile.dart' as organization_profile;
-import 'views/profiles/edit_profile.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await LocalStorageService().init(); // تهيئة التخزين المحلي
+
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
       child: const MyApp(),
     ),
   );
+}
+
+// ignore: non_constant_identifier_names
+LocalStorageService() {
 }
 
 class MyApp extends StatelessWidget {
@@ -37,26 +48,29 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      title: 'Volunteer App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/role-selection': (context) => const RoleSelectionScreen(),
-        '/volunteer/login':
-            (context) => const LoginScreen(isOrganization: false),
-        '/organization/login':
-            (context) => const LoginScreen(isOrganization: true),
-        '/volunteer/register':
-            (context) => const RegisterScreen(isOrganization: false),
-        '/organization/register':
-            (context) => const RegisterScreen(isOrganization: true),
+
+        // Auth
+        '/volunteer/login': (context) => const LoginScreen(isOrganization: false),
+        '/organization/login': (context) => const LoginScreen(isOrganization: true),
+        '/volunteer/register': (context) => const RegisterScreen(isOrganization: false),
+        '/organization/register': (context) => const RegisterScreen(isOrganization: true),
+
+        // Home
         '/volunteer/home': (context) => const VolunteerHomeScreen(),
         '/organization/home': (context) => const OrganizationHomeScreen(),
 
+        // Profiles
         '/volunteer/profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user is Volunteer) {
             return volunteer_profile.VolunteerProfilePage(volunteer: user);
@@ -67,26 +81,19 @@ class MyApp extends StatelessWidget {
         },
 
         '/organization/profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user is Organization) {
-            return organization_profile.OrganizationProfilePage(
-              organization: user,
-            );
+            return organization_profile.OrganizationProfilePage(organization: user);
           }
           return const Scaffold(
             body: Center(child: Text('Error: User type mismatch')),
           );
         },
 
+        // Edit profile
         '/edit-profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user != null) {
             return EditProfilePage(
@@ -101,7 +108,4 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-}
-
-class OrganizationProfilePage {
 }

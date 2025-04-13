@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:volunteer_app/models/volunteer_model.dart';
 import 'package:volunteer_app/providers/auth_provider.dart';
-import 'package:volunteer_app/models/organization_model.dart';
+import 'package:volunteer_app/views/auth/role_selection_screen.dart';
+import 'package:volunteer_app/views/home/volunteer_home_screen.dart';
+import 'package:volunteer_app/views/home/organization_home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -20,22 +23,26 @@ class _SplashScreenState extends State<SplashScreen> {
 
   Future<void> _initializeApp() async {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    await authProvider.loadUser();
 
-    // محاكاة عملية التهيئة
     await Future.delayed(const Duration(seconds: 2));
 
     if (authProvider.currentUser != null) {
-      // إذا كان المستخدم مسجل الدخول بالفعل
-      final isOrganization = authProvider.currentUser is Organization;
-      Navigator.pushReplacementNamed(
+      Navigator.pushReplacement(
         // ignore: use_build_context_synchronously
         context,
-        isOrganization ? '/organization/home' : '/volunteer/home',
+        MaterialPageRoute(
+          builder: (_) => authProvider.currentUser is Volunteer
+              ? const VolunteerHomeScreen()
+              : const OrganizationHomeScreen(),
+        ),
       );
     } else {
-      // إذا لم يكن المستخدم مسجل الدخول
-      // ignore: use_build_context_synchronously
-      Navigator.pushReplacementNamed(context, '/role-selection');
+      Navigator.pushReplacement(
+        // ignore: use_build_context_synchronously
+        context,
+        MaterialPageRoute(builder: (_) => const RoleSelectionScreen()),
+      );
     }
   }
 
@@ -48,12 +55,9 @@ class _SplashScreenState extends State<SplashScreen> {
           children: [
             const FlutterLogo(size: 100),
             const SizedBox(height: 20),
-            Text(
+            const Text(
               'Volunteer App',
-              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                color: Theme.of(context).primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
             const CircularProgressIndicator(),
@@ -62,4 +66,8 @@ class _SplashScreenState extends State<SplashScreen> {
       ),
     );
   }
+}
+
+extension on AuthProvider {
+  loadUser() {}
 }

@@ -1,10 +1,10 @@
 abstract class User {
-  String id;
-  String name;
-  String bio;
-  String profileImageUrl;
-  String role; // 'volunteer' or 'organization'
-  
+  final String id;
+  final String name;
+  final String bio;
+  final String profileImageUrl;
+  final String role;
+
   User({
     required this.id,
     required this.name,
@@ -12,4 +12,6 @@ abstract class User {
     required this.profileImageUrl,
     required this.role,
   });
+
+  Map<String, dynamic> toJson();
 }

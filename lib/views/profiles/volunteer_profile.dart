@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:volunteer_app/models/volunteer_model.dart';
-import 'package:volunteer_app/services/profile_service.dart';
+import 'package:volunteer_app/services/local_storage_service.dart';
 import 'package:volunteer_app/views/profiles/edit_profile.dart';
 import 'package:volunteer_app/widgets/profile_header.dart';
 import 'package:volunteer_app/widgets/profile_section.dart';

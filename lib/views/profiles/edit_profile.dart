@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:volunteer_app/models/organization_model.dart';
 import 'package:volunteer_app/models/user_model.dart';
 import 'package:volunteer_app/models/volunteer_model.dart';
@@ -23,6 +25,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController _nameController;
   late TextEditingController _bioController;
   late String _profileImageUrl;
+  File? _newImageFile;
 
   late TextEditingController _skillsController;
   late TextEditingController _experienceController;
@@ -75,7 +78,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         id: widget.user.id,
         name: _nameController.text,
         bio: _bioController.text,
-        profileImageUrl: _profileImageUrl,
+        profileImageUrl: _newImageFile?.path ?? _profileImageUrl,
         skills: _skillsController.text.split(',').map((s) => s.trim()).toList(),
         experience: _experienceController.text,
         education: _educationController.text,
@@ -86,7 +89,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         id: widget.user.id,
         name: _nameController.text,
         bio: _bioController.text,
-        profileImageUrl: _profileImageUrl,
+        profileImageUrl: _newImageFile?.path ?? _profileImageUrl,
         field: _fieldController.text,
         phone: _phoneController.text,
         email: _emailController.text,
@@ -97,6 +100,17 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     Navigator.pop(context, updatedUser);
+  }
+
+  void _pickImageFromGallery() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _newImageFile = File(pickedFile.path);
+        _profileImageUrl = pickedFile.path;
+      });
+    }
   }
 
   @override
@@ -127,47 +141,33 @@ class _EditProfilePageState extends State<EditProfilePage> {
         child: Column(
           children: [
             GestureDetector(
-              onTap: _changeProfileImage,
+              onTap: _pickImageFromGallery,
               child: CircleAvatar(
                 radius: 50,
-                backgroundImage: NetworkImage(_profileImageUrl),
-                child: Icon(Icons.camera_alt, color: Colors.white),
+                backgroundImage: _newImageFile != null
+                    ? FileImage(_newImageFile!)
+                    : NetworkImage(_profileImageUrl) as ImageProvider,
+                child: Align(
+                  alignment: Alignment.bottomRight,
+                  child: Icon(Icons.camera_alt, color: Colors.white),
+                ),
               ),
             ),
             SizedBox(height: 20),
             EditableField(controller: _nameController, label: 'Name'),
-            EditableField(
-              controller: _bioController,
-              label: 'Bio',
-              maxLines: 3,
-            ),
+            EditableField(controller: _bioController, label: 'Bio', maxLines: 3),
 
             if (!widget.isOrganization) ...[
               EditableField(controller: _skillsController, label: 'Skills'),
-              EditableField(
-                controller: _experienceController,
-                label: 'Experience',
-                maxLines: 3,
-              ),
-              EditableField(
-                controller: _educationController,
-                label: 'Education',
-              ),
-              EditableField(
-                controller: _certificationsController,
-                label: 'Certifications',
-                maxLines: 3,
-              ),
+              EditableField(controller: _experienceController, label: 'Experience', maxLines: 3),
+              EditableField(controller: _educationController, label: 'Education'),
+              EditableField(controller: _certificationsController, label: 'Certifications', maxLines: 3),
             ] else ...[
               EditableField(controller: _fieldController, label: 'Field'),
               EditableField(controller: _phoneController, label: 'Phone'),
               EditableField(controller: _emailController, label: 'Email'),
               EditableField(controller: _addressController, label: 'Address'),
-              EditableField(
-                controller: _projectsController,
-                label: 'Current Projects',
-                maxLines: 3,
-              ),
+              EditableField(controller: _projectsController, label: 'Current Projects', maxLines: 3),
               Text('Rating: ${_rating.toStringAsFixed(1)}'),
               Slider(
                 value: _rating,
@@ -189,41 +189,15 @@ class _EditProfilePageState extends State<EditProfilePage> {
                   onPressed: () => Navigator.pop(context),
                   child: Text('Cancel'),
                 ),
-                ElevatedButton(onPressed: _saveChanges, child: Text('Save')),
+                ElevatedButton(
+                  onPressed: _saveChanges,
+                  child: Text('Save'),
+                ),
               ],
             ),
           ],
         ),
       ),
     );
-  }
-
-  void _changeProfileImage() async {
-    final newImageUrl = await showDialog<String>(
-      context: context,
-      builder:
-          (context) => AlertDialog(
-            title: Text('Change Profile Image'),
-            content: Text('Enter new image URL:'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: Text('Cancel'),
-              ),
-              TextButton(
-                onPressed:
-                    () =>
-                        Navigator.pop(context, 'https://example.com/image.jpg'),
-                child: Text('Use Example'),
-              ),
-            ],
-          ),
-    );
-
-    if (newImageUrl != null) {
-      setState(() {
-        _profileImageUrl = newImageUrl;
-      });
-    }
   }
 }
