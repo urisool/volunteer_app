@@ -1,58 +1,22 @@
 import 'package:flutter/material.dart';
-import 'package:volunteer_app/models/organization_model.dart';
-import 'package:volunteer_app/services/profile_service.dart';
-import 'package:volunteer_app/views/profiles/edit_profile.dart';
-import 'package:volunteer_app/widgets/profile_header.dart';
-import 'package:volunteer_app/widgets/profile_section.dart';
+import 'package:provider/provider.dart';
+import '../../models/organization_model.dart';
+import '../../providers/auth_provider.dart';
+import 'edit_profile.dart';
 
-// ignore: must_be_immutable
 class OrganizationProfilePage extends StatefulWidget {
-  Organization organization;
-  OrganizationProfilePage({super.key, required this.organization});
+  const OrganizationProfilePage({super.key, required Organization organization});
 
   @override
   // ignore: library_private_types_in_public_api
-  _OrganizationProfilePageState createState() =>
-      _OrganizationProfilePageState();
+  _OrganizationProfilePageState createState() => _OrganizationProfilePageState();
 }
 
 class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
-  final ProfileService _profileService = ProfileService();
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProfileData();
-  }
-
-  Future<void> _loadProfileData() async {
-    try {
-      final org = await _profileService.getOrganizationProfile(
-        widget.organization.id,
-      );
-      setState(() {
-        widget.organization = org;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load profile: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    if (_errorMessage != null) {
-      return Center(child: Text(_errorMessage!));
-    }
+    final authProvider = Provider.of<AuthProvider>(context);
+    final organization = authProvider.currentUser as Organization;
 
     return Scaffold(
       appBar: AppBar(
@@ -60,62 +24,85 @@ class _OrganizationProfilePageState extends State<OrganizationProfilePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            onPressed: _navigateToEditProfile,
+            onPressed: () => _navigateToEditProfile(context),
           ),
         ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ProfileHeader(
-              imageUrl: widget.organization.logoUrl,
-              name: widget.organization.name,
-              role: 'Organization',
-            ),
-            ProfileSection(
-              title: 'Description',
-              content: widget.organization.description,
-            ),
-            ProfileSection(
-              title: 'Services',
-              content: widget.organization.services.join(', '),
-            ),
-            ProfileSection(
-              title: 'Website',
-              content: widget.organization.website,
-            ),
-            ProfileSection(
-              title: 'Contact',
-              content: widget.organization.contactEmail,
-            ),
+            _buildProfileHeader(organization),
+            const SizedBox(height: 20),
+            _buildProfileSection('Bio', organization.bio),
+            _buildProfileSection('Field', organization.field),
+            _buildProfileSection('Contact Info', 
+              'Email: ${organization.email}\nPhone: ${organization.phone}\nAddress: ${organization.address}'),
+            _buildProfileSection('Current Projects', organization.currentProjects.join('\n')),
+            _buildProfileSection('Rating', '${organization.rating}/5'),
           ],
         ),
       ),
     );
   }
 
-  void _navigateToEditProfile() {
+  Widget _buildProfileHeader(Organization organization) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundImage: NetworkImage(organization.profileImageUrl),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          organization.name,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          'Organization',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileSection(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 16),
+          ),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToEditProfile(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder:
-            (context) => EditProfilePage(
-              user: widget.organization,
-              isOrganization: true,
-            ),
+        builder: (context) => EditProfilePage(
+          user: Provider.of<AuthProvider>(context, listen: false).currentUser!,
+          isOrganization: true,
+        ),
       ),
-    ).then((updatedOrg) {
-      if (updatedOrg != null) {
-        setState(() {
-          widget.organization = updatedOrg as Organization;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _profileService.dispose();
-    super.dispose();
+    ).then((_) => setState(() {}));
   }
 }

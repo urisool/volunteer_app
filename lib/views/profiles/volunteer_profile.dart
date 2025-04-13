@@ -1,14 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:volunteer_app/models/volunteer_model.dart';
-import 'package:volunteer_app/services/profile_service.dart';
-import 'package:volunteer_app/views/profiles/edit_profile.dart';
-import 'package:volunteer_app/widgets/profile_header.dart';
-import 'package:volunteer_app/widgets/profile_section.dart';
+import 'package:provider/provider.dart';
+import '../../models/volunteer_model.dart';
+import '../../providers/auth_provider.dart';
+import 'edit_profile.dart';
 
-// ignore: must_be_immutable
 class VolunteerProfilePage extends StatefulWidget {
-  Volunteer volunteer; // جعل الحقل final
-  VolunteerProfilePage({super.key, required this.volunteer}); // إزالة const
+  const VolunteerProfilePage({super.key, required Volunteer volunteer});
 
   @override
   // ignore: library_private_types_in_public_api
@@ -16,106 +13,95 @@ class VolunteerProfilePage extends StatefulWidget {
 }
 
 class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
-  final ProfileService _profileService = ProfileService();
-  bool _isLoading = true;
-  String? _errorMessage;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadProfileData();
-  }
-
-  Future<void> _loadProfileData() async {
-    try {
-      final volunteer = await _profileService.getVolunteerProfile(widget.volunteer.id); // التأكد من أنه id الصحيح
-      setState(() {
-        widget.volunteer = volunteer;
-        _isLoading = false;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to load profile: $e';
-        _isLoading = false;
-      });
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Center(child: CircularProgressIndicator());
-    }
-    
-    if (_errorMessage != null) {
-      return Center(child: Text(_errorMessage!));
-    }
+    final authProvider = Provider.of<AuthProvider>(context);
+    final volunteer = authProvider.currentUser as Volunteer;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Volunteer Profile'),
+        title: const Text('Volunteer Profile'),
         actions: [
           IconButton(
-            icon: Icon(Icons.edit),
-            onPressed: () => _navigateToEditProfile(),
+            icon: const Icon(Icons.edit),
+            onPressed: () => _navigateToEditProfile(context),
           ),
         ],
       ),
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            ProfileHeader(
-              imageUrl: widget.volunteer.profileImageUrl,
-              name: widget.volunteer.name,
-              role: 'Volunteer',
-            ),
-            ProfileSection(
-              title: 'Bio',
-              content: widget.volunteer.bio,
-            ),
-            ProfileSection(
-              title: 'Skills',
-              content: widget.volunteer.skills.join(', '),
-            ),
-            ProfileSection(
-              title: 'Experience',
-              content: widget.volunteer.experience,
-            ),
-            ProfileSection(
-              title: 'Education',
-              content: widget.volunteer.education,
-            ),
-            ProfileSection(
-              title: 'Certifications',
-              content: widget.volunteer.certifications.join('\n'),
-            ),
+            _buildProfileHeader(volunteer),
+            const SizedBox(height: 20),
+            _buildProfileSection('Bio', volunteer.bio),
+            _buildProfileSection('Skills', volunteer.skills.join(', ')),
+            _buildProfileSection('Experience', volunteer.experience),
+            _buildProfileSection('Education', volunteer.education),
+            _buildProfileSection('Certifications', volunteer.certifications.join('\n')),
           ],
         ),
       ),
     );
   }
-  
-  void _navigateToEditProfile() {
+
+  Widget _buildProfileHeader(Volunteer volunteer) {
+    return Column(
+      children: [
+        CircleAvatar(
+          radius: 50,
+          backgroundImage: NetworkImage(volunteer.profileImageUrl),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          volunteer.name,
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          'Volunteer',
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.grey[600],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildProfileSection(String title, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            content,
+            style: const TextStyle(fontSize: 16),
+          ),
+          const Divider(),
+        ],
+      ),
+    );
+  }
+
+  void _navigateToEditProfile(BuildContext context) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => EditProfilePage(
-          user: widget.volunteer,
+          user: Provider.of<AuthProvider>(context, listen: false).currentUser!,
           isOrganization: false,
         ),
       ),
-    ).then((updatedUser) {
-      if (updatedUser != null) {
-        setState(() {
-          widget.volunteer = updatedUser as Volunteer;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _profileService.dispose();
-    super.dispose();
+    ).then((_) => setState(() {}));
   }
 }
