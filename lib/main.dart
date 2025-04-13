@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'colors.dart';
+
 import 'package:provider/provider.dart';
 
 // Models
@@ -37,26 +39,40 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        scaffoldBackgroundColor: AppColors.paleGreen,
+        primaryColor: AppColors.forestGreen,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppColors.deepGreen,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        textTheme: const TextTheme(
+          bodyLarge: TextStyle(color: AppColors.darkForest),
+          bodyMedium: TextStyle(color: AppColors.oliveGreen),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.forestGreen,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+      ),
       initialRoute: '/splash',
       routes: {
         '/splash': (context) => const SplashScreen(),
         '/role-selection': (context) => const RoleSelectionScreen(),
-        '/volunteer/login':
-            (context) => const LoginScreen(isOrganization: false),
-        '/organization/login':
-            (context) => const LoginScreen(isOrganization: true),
-        '/volunteer/register':
-            (context) => const RegisterScreen(isOrganization: false),
-        '/organization/register':
-            (context) => const RegisterScreen(isOrganization: true),
+        '/volunteer/login': (context) => const LoginScreen(isOrganization: false),
+        '/organization/login': (context) => const LoginScreen(isOrganization: true),
+        '/volunteer/register': (context) => const RegisterScreen(isOrganization: false),
+        '/organization/register': (context) => const RegisterScreen(isOrganization: true),
         '/volunteer/home': (context) => const VolunteerHomeScreen(),
         '/organization/home': (context) => const OrganizationHomeScreen(),
-
         '/volunteer/profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user is Volunteer) {
             return volunteer_profile.VolunteerProfilePage(volunteer: user);
@@ -65,28 +81,18 @@ class MyApp extends StatelessWidget {
             body: Center(child: Text('Error: User type mismatch')),
           );
         },
-
         '/organization/profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user is Organization) {
-            return organization_profile.OrganizationProfilePage(
-              organization: user,
-            );
+            return organization_profile.OrganizationProfilePage(organization: user);
           }
           return const Scaffold(
             body: Center(child: Text('Error: User type mismatch')),
           );
         },
-
         '/edit-profile': (context) {
-          final authProvider = Provider.of<AuthProvider>(
-            context,
-            listen: false,
-          );
+          final authProvider = Provider.of<AuthProvider>(context, listen: false);
           final user = authProvider.currentUser;
           if (user != null) {
             return EditProfilePage(
@@ -101,7 +107,4 @@ class MyApp extends StatelessWidget {
       },
     );
   }
-}
-
-class OrganizationProfilePage {
 }
