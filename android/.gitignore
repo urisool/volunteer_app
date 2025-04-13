@@ -1,12 +1,4 @@
-<<<<<<< HEAD
-#gradle-wrapper.jar
-#/.gradle
-#/captures/
-#/gradlew
-#/gradlew.bat
-/local.properties
-#GeneratedPluginRegistrant.java
-=======
+
 gradle-wrapper.jar
 /.gradle
 /captures/
@@ -14,7 +6,6 @@ gradle-wrapper.jar
 /gradlew.bat
 local.properties
 GeneratedPluginRegistrant.java
->>>>>>> 1369e6a7364cb999f91448bf21e9b31910ecdb32
 .cxx/
 
 # Remember to never publicly share your keystore.
