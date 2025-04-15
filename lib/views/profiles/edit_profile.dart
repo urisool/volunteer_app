@@ -1,98 +1,153 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../models/user_model.dart';
-import '../../models/volunteer_model.dart';
-import '../../models/organization_model.dart';
-import '../../providers/auth_provider.dart';
-import '../../services/profile_service.dart';
+import 'package:volunteer_app/models/organization_model.dart';
+import 'package:volunteer_app/models/user_model.dart';
+import 'package:volunteer_app/models/volunteer_model.dart';
+import 'package:volunteer_app/services/profile_service.dart';
 
 class EditProfilePage extends StatefulWidget {
   final User user;
   final bool isOrganization;
+  final Future<Null> Function(dynamic updatedUser) onSave;
 
   const EditProfilePage({
     super.key,
     required this.user,
     required this.isOrganization,
+    required this.onSave, // تمرير الدالة هنا
   });
 
   @override
-  // ignore: library_private_types_in_public_api
-  _EditProfilePageState createState() => _EditProfilePageState();
+  State<EditProfilePage> createState() => _EditProfilePageState();
 }
 
 class _EditProfilePageState extends State<EditProfilePage> {
-  late TextEditingController _nameController;
-  late TextEditingController _bioController;
-  late String _profileImageUrl;
+  late final ProfileService _profileService;
+  late final TextEditingController _nameController;
+  late final TextEditingController _bioController;
+  late final TextEditingController _skillsController;
+  late final TextEditingController _experienceController;
+  late final TextEditingController _educationController;
+  late final TextEditingController _certificationsController;
+  late final TextEditingController _fieldController;
+  late final TextEditingController _phoneController;
+  late final TextEditingController _emailController;
+  late final TextEditingController _addressController;
+  late final TextEditingController _projectsController;
 
-  // Volunteer specific fields
-  late TextEditingController _skillsController;
-  late TextEditingController _experienceController;
-  late TextEditingController _educationController;
-  late TextEditingController _certificationsController;
-
-  // Organization specific fields
-  late TextEditingController _fieldController;
-  late TextEditingController _phoneController;
-  late TextEditingController _emailController;
-  late TextEditingController _addressController;
-  late TextEditingController _projectsController;
-  late double _rating;
-
-  final ProfileService _profileService = ProfileService();
+  double _rating = 0.0;
+  String _profileImageUrl = '';
+  File? _imageFile;
   bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
+    _profileService = ProfileService();
     _initializeControllers();
+    _initializeFields();
   }
 
   void _initializeControllers() {
-    _nameController = TextEditingController(text: widget.user.name);
-    _bioController = TextEditingController(text: widget.user.bio);
+    _nameController = TextEditingController();
+    _bioController = TextEditingController();
+    _skillsController = TextEditingController();
+    _experienceController = TextEditingController();
+    _educationController = TextEditingController();
+    _certificationsController = TextEditingController();
+    _fieldController = TextEditingController();
+    _phoneController = TextEditingController();
+    _emailController = TextEditingController();
+    _addressController = TextEditingController();
+    _projectsController = TextEditingController();
+  }
+
+  void _initializeFields() {
+    _nameController.text = widget.user.name;
+    _bioController.text = widget.user.bio;
     _profileImageUrl = widget.user.profileImageUrl;
 
-    if (!widget.isOrganization) {
+    if (widget.user is Volunteer) {
       final volunteer = widget.user as Volunteer;
-      _skillsController = TextEditingController(text: volunteer.skills.join(', '));
-      _experienceController = TextEditingController(text: volunteer.experience);
-      _educationController = TextEditingController(text: volunteer.education);
-      _certificationsController = TextEditingController(text: volunteer.certifications.join('\n'));
-    } else {
+      _skillsController.text = volunteer.skills.join(', ');
+      _experienceController.text = volunteer.experience;
+      _educationController.text = volunteer.education;
+      _certificationsController.text = volunteer.certifications.join('\n');
+    } else if (widget.user is Organization) {
       final organization = widget.user as Organization;
-      _fieldController = TextEditingController(text: organization.field);
-      _phoneController = TextEditingController(text: organization.phone);
-      _emailController = TextEditingController(text: organization.email);
-      _addressController = TextEditingController(text: organization.address);
-      _projectsController = TextEditingController(text: organization.currentProjects.join('\n'));
+      _fieldController.text = organization.field;
+      _phoneController.text = organization.phone;
+      _emailController.text = organization.email;
+      _addressController.text = organization.address;
+      _projectsController.text = organization.currentProjects.join('\n');
       _rating = organization.rating;
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Profile'),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  _buildProfileImageSection(),
-                  const SizedBox(height: 20),
-                  _buildCommonFields(),
-                  if (!widget.isOrganization) _buildVolunteerFields(),
-                  if (widget.isOrganization) _buildOrganizationFields(),
-                  const SizedBox(height: 20),
-                  _buildActionButtons(context),
-                ],
-              ),
-            ),
+  Future<void> _changeProfileImage() async {
+    try {
+      final pickedFile = await _profileService.pickImage();
+      if (pickedFile != null) {
+        setState(() {
+          _imageFile = pickedFile;
+        });
+      }
+    } catch (e) {
+      _showErrorSnackBar('Failed to pick image: $e');
+    }
+  }
+
+  Future<void> _saveChanges() async {
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      User updatedUser = _createUpdatedUser();
+      widget.onSave(updatedUser); // استدعاء الدالة onSave هنا
+      Navigator.pop(context, updatedUser); // إرجاع البيانات المعدلة
+    } catch (e) {
+      _showErrorSnackBar('Error saving changes: $e');
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  User _createUpdatedUser() {
+    final newImageUrl = _imageFile != null 
+        ? 'local://${_imageFile!.path}' 
+        : _profileImageUrl;
+
+    return widget.isOrganization
+        ? Organization(
+            id: widget.user.id,
+            name: _nameController.text,
+            bio: _bioController.text,
+            profileImageUrl: newImageUrl,
+            field: _fieldController.text,
+            phone: _phoneController.text,
+            email: _emailController.text,
+            address: _addressController.text,
+            currentProjects: _projectsController.text.split('\n'),
+            rating: _rating,
+          )
+        : Volunteer(
+            id: widget.user.id,
+            name: _nameController.text,
+            bio: _bioController.text,
+            profileImageUrl: newImageUrl,
+            skills: _skillsController.text.split(',').map((s) => s.trim()).toList(),
+            experience: _experienceController.text,
+            education: _educationController.text,
+            certifications: _certificationsController.text.split('\n'),
+          );
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
     );
   }
 
@@ -103,14 +158,23 @@ class _EditProfilePageState extends State<EditProfilePage> {
         children: [
           CircleAvatar(
             radius: 50,
-            backgroundImage: NetworkImage(_profileImageUrl),
+            backgroundImage: _getProfileImage(),
             child: const Icon(Icons.camera_alt, color: Colors.white),
           ),
           const SizedBox(height: 8),
-          const Text('Change Profile Picture'),
+          const Text(
+            'Change Profile Picture',
+            style: TextStyle(color: Colors.blue),
+          ),
         ],
       ),
     );
+  }
+
+  ImageProvider _getProfileImage() {
+    if (_imageFile != null) return FileImage(_imageFile!);
+    if (_profileImageUrl.startsWith('http')) return NetworkImage(_profileImageUrl);
+    return const AssetImage('assets/default_profile.png');
   }
 
   Widget _buildCommonFields() {
@@ -133,12 +197,9 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildVolunteerFields() {
     return Column(
       children: [
-        const SizedBox(height: 16),
         TextField(
           controller: _skillsController,
-          decoration: const InputDecoration(
-            labelText: 'Skills (comma separated)',
-          ),
+          decoration: const InputDecoration(labelText: 'Skills (comma separated)'),
         ),
         const SizedBox(height: 16),
         TextField(
@@ -154,9 +215,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
         const SizedBox(height: 16),
         TextField(
           controller: _certificationsController,
-          decoration: const InputDecoration(
-            labelText: 'Certifications (one per line)',
-          ),
+          decoration: const InputDecoration(labelText: 'Certifications (one per line)'),
           maxLines: 3,
         ),
       ],
@@ -166,15 +225,14 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget _buildOrganizationFields() {
     return Column(
       children: [
-        const SizedBox(height: 16),
         TextField(
           controller: _fieldController,
-          decoration: const InputDecoration(labelText: 'Field/Industry'),
+          decoration: const InputDecoration(labelText: 'Field'),
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _phoneController,
-          decoration: const InputDecoration(labelText: 'Phone Number'),
+          decoration: const InputDecoration(labelText: 'Phone'),
           keyboardType: TextInputType.phone,
         ),
         const SizedBox(height: 16),
@@ -187,134 +245,87 @@ class _EditProfilePageState extends State<EditProfilePage> {
         TextField(
           controller: _addressController,
           decoration: const InputDecoration(labelText: 'Address'),
-          maxLines: 2,
         ),
         const SizedBox(height: 16),
         TextField(
           controller: _projectsController,
-          decoration: const InputDecoration(
-            labelText: 'Current Projects (one per line)',
-          ),
+          decoration: const InputDecoration(labelText: 'Current Projects (one per line)'),
           maxLines: 3,
         ),
         const SizedBox(height: 16),
-        Text('Rating: ${_rating.toStringAsFixed(1)}'),
-        Slider(
-          value: _rating,
-          min: 0,
-          max: 5,
-          divisions: 10,
-          onChanged: (value) => setState(() => _rating = value),
+        Row(
+          children: [
+            const Text('Rating:'),
+            Expanded(
+              child: Slider(
+                value: _rating,
+                min: 0,
+                max: 5,
+                divisions: 10,
+                label: _rating.toStringAsFixed(1),
+                onChanged: (value) => setState(() => _rating = value),
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildActionButtons(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: [
-        ElevatedButton(
-          onPressed: () => Navigator.pop(context),
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.grey),
-          child: const Text('Cancel'),
-        ),
-        ElevatedButton(
-          onPressed: () => _saveChanges(context),
-          child: const Text('Save'),
-        ),
-      ],
-    );
-  }
-
-  Future<void> _changeProfileImage() async {
-    // في التطبيق الحقيقي، استخدم حزمة مثل image_picker
-    final newImageUrl = await showDialog<String>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Change Profile Image'),
-        content: const Text('Enter new image URL:'),
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Edit Profile'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, 'https://example.com/new_profile.jpg'),
-            child: const Text('Use Example'),
-          ),
+          if (_isLoading)
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(),
+            ),
         ],
       ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  _buildProfileImageSection(),
+                  const SizedBox(height: 24),
+                  _buildCommonFields(),
+                  const SizedBox(height: 16),
+                  if (!widget.isOrganization) 
+                    _buildVolunteerFields() 
+                  else 
+                    _buildOrganizationFields(),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: _saveChanges,
+                      child: const Text('Save Changes'),
+                    ),
+                  ),
+                ],
+              ),
+            ),
     );
-
-    if (newImageUrl != null) {
-      setState(() => _profileImageUrl = newImageUrl);
-    }
-  }
-
-  Future<void> _saveChanges(BuildContext context) async {
-    setState(() => _isLoading = true);
-
-    try {
-      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      User updatedUser;
-
-      if (!widget.isOrganization) {
-        updatedUser = Volunteer(
-          id: widget.user.id,
-          name: _nameController.text,
-          bio: _bioController.text,
-          profileImageUrl: _profileImageUrl,
-          skills: _skillsController.text.split(',').map((s) => s.trim()).toList(),
-          experience: _experienceController.text,
-          education: _educationController.text,
-          certifications: _certificationsController.text.split('\n'),
-        );
-      } else {
-        updatedUser = Organization(
-          id: widget.user.id,
-          name: _nameController.text,
-          bio: _bioController.text,
-          profileImageUrl: _profileImageUrl,
-          field: _fieldController.text,
-          phone: _phoneController.text,
-          email: _emailController.text,
-          address: _addressController.text,
-          currentProjects: _projectsController.text.split('\n'),
-          rating: _rating,
-        );
-      }
-
-      await authProvider.updateProfile(updatedUser);
-      // ignore: use_build_context_synchronously
-      Navigator.pop(context);
-    } catch (e) {
-      // ignore: use_build_context_synchronously
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error saving changes: $e')),
-      );
-    } finally {
-      setState(() => _isLoading = false);
-    }
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _bioController.dispose();
-    if (!widget.isOrganization) {
-      _skillsController.dispose();
-      _experienceController.dispose();
-      _educationController.dispose();
-      _certificationsController.dispose();
-    } else {
-      _fieldController.dispose();
-      _phoneController.dispose();
-      _emailController.dispose();
-      _addressController.dispose();
-      _projectsController.dispose();
-    }
-    _profileService.dispose();
+    _skillsController.dispose();
+    _experienceController.dispose();
+    _educationController.dispose();
+    _certificationsController.dispose();
+    _fieldController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
+    _addressController.dispose();
+    _projectsController.dispose();
     super.dispose();
   }
 }

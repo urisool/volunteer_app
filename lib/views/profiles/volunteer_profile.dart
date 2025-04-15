@@ -1,5 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+
 import '../../models/volunteer_model.dart';
 import '../../providers/auth_provider.dart';
 import 'edit_profile.dart';
@@ -13,6 +17,35 @@ class VolunteerProfilePage extends StatefulWidget {
 }
 
 class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
+  File? _imageFile;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+
+    if (picked != null) {
+      final path = picked.path;
+
+      setState(() {
+        _imageFile = File(path);
+      });
+
+      // ignore: use_build_context_synchronously
+      final authProvider = Provider.of<AuthProvider>(context, listen: false);
+      final volunteer = authProvider.currentUser as Volunteer;
+
+      // حفظ مسار الصورة محليًا
+      volunteer.profileImageUrl = path;
+      authProvider.updateUser(volunteer); // حذف await لتفادي الخطأ
+
+      // إظهار رسالة نجاح
+      // ignore: use_build_context_synchronously
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('تم تحديث الصورة بنجاح')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
@@ -46,11 +79,25 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
   }
 
   Widget _buildProfileHeader(Volunteer volunteer) {
+    ImageProvider imageProvider;
+
+    if (_imageFile != null) {
+      imageProvider = FileImage(_imageFile!);
+    } else if (volunteer.profileImageUrl.isNotEmpty &&
+        File(volunteer.profileImageUrl).existsSync()) {
+      imageProvider = FileImage(File(volunteer.profileImageUrl));
+    } else {
+      imageProvider = const AssetImage('assets/default_avatar.png');
+    }
+
     return Column(
       children: [
-        CircleAvatar(
-          radius: 50,
-          backgroundImage: NetworkImage(volunteer.profileImageUrl),
+        GestureDetector(
+          onTap: _pickImage,
+          child: CircleAvatar(
+            radius: 50,
+            backgroundImage: imageProvider,
+          ),
         ),
         const SizedBox(height: 10),
         Text(
@@ -100,6 +147,9 @@ class _VolunteerProfilePageState extends State<VolunteerProfilePage> {
         builder: (context) => EditProfilePage(
           user: Provider.of<AuthProvider>(context, listen: false).currentUser!,
           isOrganization: false,
+          onSave: (updatedUser) async {
+            setState(() {});
+          },
         ),
       ),
     ).then((_) => setState(() {}));

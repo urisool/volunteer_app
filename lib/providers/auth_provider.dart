@@ -22,10 +22,8 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // محاكاة اتصال بالخادم
       await Future.delayed(const Duration(seconds: 1));
 
-      // في التطبيق الحقيقي، سيتم استدعاء API هنا
       if (isOrganization) {
         _currentUser = Organization(
           id: 'org_${email.hashCode}',
@@ -66,7 +64,6 @@ class AuthProvider with ChangeNotifier {
       _isLoading = true;
       notifyListeners();
 
-      // محاكاة اتصال بالخادم
       await Future.delayed(const Duration(seconds: 1));
 
       if (isOrganization) {
@@ -131,4 +128,6 @@ class AuthProvider with ChangeNotifier {
       notifyListeners();
     }
   }
+
+  void updateUser(Volunteer volunteer) {}
 }

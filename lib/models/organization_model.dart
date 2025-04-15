@@ -1,4 +1,4 @@
-import 'user_model.dart';
+import 'package:volunteer_app/models/user_model.dart';
 
 class Organization extends User {
   String field;
@@ -8,26 +8,33 @@ class Organization extends User {
   List<String> currentProjects;
   double rating;
 
+  @override
+  // ignore: overridden_fields
+  String profileImageUrl;
+
   Organization({
     required super.id,
     required super.name,
     required super.bio,
-    required super.profileImageUrl,
     required this.field,
     required this.phone,
     required this.email,
     required this.address,
     required this.currentProjects,
     required this.rating,
-  }) : super(role: 'organization');
+    this.profileImageUrl = '', // إذا لم يتم توفيره، سيكون فارغًا
+  }) : super(
+          profileImageUrl: profileImageUrl, // تمريرها للكلاس الأب
+          role: 'organization', // إذا كان لديك تعديل آخر في الكلاس الأب
+        );
 
-  get logoUrl => null;
+  String get logoUrl => profileImageUrl;
 
-  get description => null;
+  String get description => bio;
 
-  get services => null;
+  List<String> get services => currentProjects;
 
-  get website => null;
+  String get website => email;
 
-  get contactEmail => null;
+  String get contactEmail => email;
 }

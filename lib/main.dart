@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'colors.dart';
-
 import 'package:provider/provider.dart';
 
 // Models
@@ -26,7 +25,9 @@ import 'views/profiles/edit_profile.dart';
 void main() {
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => AuthProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -98,6 +99,15 @@ class MyApp extends StatelessWidget {
             return EditProfilePage(
               user: user,
               isOrganization: user is Organization,
+              onSave: (updatedUser) async {
+                await authProvider.updateProfile(updatedUser);
+                // ignore: use_build_context_synchronously
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم حفظ التعديلات بنجاح')),
+                );
+                // ignore: use_build_context_synchronously
+                Navigator.pop(context); // الرجوع للخلف بعد الحفظ
+              },
             );
           }
           return const Scaffold(
