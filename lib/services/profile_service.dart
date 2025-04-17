@@ -95,7 +95,7 @@ class ProfileService {
           skills: List<String>.from(data['skills'] ?? []),
           experience: data['experience'] ?? '',
           certifications: List<String>.from(data['certifications'] ?? []),
-          education: data['education'] ?? '',
+          education: data['education'] ?? '', upcomingEvents: [], completedEvents: [], totalHours: 0, badges: [],
         );
       } else {
         throw Exception('فشل تحميل الملف الشخصي: ${response.statusCode}');

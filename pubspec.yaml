@@ -41,6 +41,12 @@ dependencies:
   cloud_firestore: ^4.17.5
   shared_preferences: ^2.5.3
   path_provider: ^2.1.5
+  firebase_messaging: ^14.7.10
+  flutter_local_notifications: ^19.1.0
+  flutter_rating_bar: ^4.0.1
+  geolocator: ^14.0.0
+  intl: ^0.20.2
+  flutter_launcher_icons: ^0.14.3
 
 dev_dependencies:
   flutter_test:
@@ -64,7 +70,7 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/default_profile.jpg 
+    - assets/default_profile.png 
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg
@@ -95,3 +101,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+flutter_icons:
+  android: true
+  image_path: "assets/icon/app_icon.png" # put your own icon path here

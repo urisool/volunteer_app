@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:volunteer_app/services/auth_service.dart';
 import 'colors.dart';
 import 'package:provider/provider.dart';
 
@@ -21,17 +22,28 @@ import 'views/home/organization_home_screen.dart';
 import 'views/profiles/volunteer_profile.dart' as volunteer_profile;
 import 'views/profiles/organization_profile.dart' as organization_profile;
 import 'views/profiles/edit_profile.dart';
+// Correct ApiService import
+import 'package:volunteer_app/services/api_service.dart' as api_service;
+// Assuming achievement_provider.dart has its own ApiService
 
 void main() {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            AuthService(api_service.ApiService()), // Use the ApiService with the alias
+            api_service.ApiService(), // Assuming AuthProvider needs both instances of ApiService
+          ),
+        ),
       ],
       child: const MyApp(),
     ),
   );
 }
+
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

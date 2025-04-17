@@ -14,7 +14,7 @@ class Volunteer extends User {
     required this.skills,
     required this.experience,
     required this.certifications,
-    required this.education,
+    required this.education, required List upcomingEvents, required List completedEvents, required int totalHours, required List badges,
   }) : super(
           role: 'volunteer',
         );
@@ -28,7 +28,7 @@ class Volunteer extends User {
       skills: List<String>.from(json['skills'] ?? []),
       experience: json['experience'] ?? '',
       certifications: List<String>.from(json['certifications'] ?? []),
-      education: json['education'] ?? '',
+      education: json['education'] ?? '', upcomingEvents: [], completedEvents: [], totalHours: 0, badges: [],
     );
   }
 
@@ -64,7 +64,7 @@ class Volunteer extends User {
       skills: skills ?? this.skills,
       experience: experience ?? this.experience,
       certifications: certifications ?? this.certifications,
-      education: education ?? this.education,
+      education: education ?? this.education, upcomingEvents: [], completedEvents: [], totalHours: 0, badges: [],
     );
   }
 }

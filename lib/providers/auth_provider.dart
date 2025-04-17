@@ -1,64 +1,86 @@
+import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
+
 import '../models/user_model.dart';
 import '../models/volunteer_model.dart';
 import '../models/organization_model.dart';
+import '../services/api_service.dart';
+import '../services/auth_service.dart';
 import '../services/profile_service.dart';
 
 class AuthProvider with ChangeNotifier {
+  final AuthService _authService;
+  final ApiService _apiService;
   User? _currentUser;
   bool _isLoading = false;
   String? _error;
 
+  AuthProvider(this._authService, this._apiService);
+
+  // Getters
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   String? get error => _error;
 
-  Future<void> login(
-    String email,
-    String password, {
-    required bool isOrganization,
-  }) async {
+  // تسجيل الدخول
+  Future<bool> login(String email, String password, {bool isOrganization = false}) async {
+    _isLoading = true;
+    notifyListeners();
+
     try {
-      _isLoading = true;
-      notifyListeners();
-
-      await Future.delayed(const Duration(seconds: 1));
-
-      if (isOrganization) {
-        _currentUser = Organization(
-          id: 'org_${email.hashCode}',
-          name: 'Charity Organization',
-          bio: 'Helping people since 2000',
-          profileImageUrl: 'https://example.com/org.jpg',
-          field: 'Education',
-          phone: '+123456789',
-          email: email,
-          address: '123 Main St, City',
-          currentProjects: ['School Building', 'Food Drive'],
-          rating: 4.5,
-        );
-      } else {
-        _currentUser = Volunteer(
-          id: 'vol_${email.hashCode}',
-          name: 'Volunteer User',
-          bio: 'I love volunteering!',
-          profileImageUrl: 'https://example.com/volunteer.jpg',
-          skills: ['Teaching', 'First Aid'],
-          experience: '5 years of volunteering',
-          certifications: ['First Aid Certified'],
-          education: 'Bachelor in Social Work',
-        );
-      }
-
+      final user = await _authService.login(email, password);
+      _currentUser = user;
+      await _saveUserData(user);
       _error = null;
+      return true;
     } catch (e) {
-      _error = e.toString();
+      _error = 'فشل تسجيل الدخول: $e';
+      throw Exception(_error);
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
+  // تسجيل الخروج
+  Future<void> logout() async {
+    await _authService.logout();
+    _currentUser = null;
+    await _clearUserData();
+    notifyListeners();
+  }
+
+  // التحقق من حالة المصادقة
+  Future<void> checkAuthStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('authToken');
+
+    if (token != null) {
+      try {
+        _currentUser = await _apiService.getCurrentUser();
+      } catch (e) {
+        await _clearUserData();
+      }
+    }
+    notifyListeners();
+  }
+
+  // حفظ بيانات المستخدم محلياً
+  Future<void> _saveUserData(User user) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('authToken', user.token!);
+    await prefs.setString('userId', user.id);
+  }
+
+  // مسح البيانات المحلية
+  Future<void> _clearUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('authToken');
+    await prefs.remove('userId');
+  }
+
+  // التسجيل
   Future<void> register(Map<String, dynamic> data, bool isOrganization) async {
     try {
       _isLoading = true;
@@ -89,6 +111,10 @@ class AuthProvider with ChangeNotifier {
           experience: '',
           certifications: [],
           education: '',
+          upcomingEvents: [],
+          completedEvents: [],
+          totalHours: 0,
+          badges: [],
         );
       }
 
@@ -101,11 +127,7 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  Future<void> logout() async {
-    _currentUser = null;
-    notifyListeners();
-  }
-
+  // تحديث الملف الشخصي
   Future<void> updateProfile(User updatedUser) async {
     try {
       _isLoading = true;
@@ -129,5 +151,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  void updateUser(Volunteer volunteer) {}
+  void updateUser(Volunteer volunteer) {
+    if (_currentUser is Volunteer) {
+      _currentUser = volunteer;
+      notifyListeners();
+    }
+  }
 }

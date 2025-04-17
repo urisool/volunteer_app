@@ -140,7 +140,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
             skills: _skillsController.text.split(',').map((s) => s.trim()).toList(),
             experience: _experienceController.text,
             education: _educationController.text,
-            certifications: _certificationsController.text.split('\n'),
+            certifications: _certificationsController.text.split('\n'), upcomingEvents: [], completedEvents: [], totalHours: 0, badges: [],
           );
   }
 
